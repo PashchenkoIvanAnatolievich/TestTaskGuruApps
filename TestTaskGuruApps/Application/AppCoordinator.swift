@@ -40,8 +40,16 @@ extension AppCoordinator {
     
     private func showSalesScreen() {
         let salesCoordinator = SalesCoordinator(navigationController: navigationController)
+        salesCoordinator.delegate = self
         childCoordinators.append(salesCoordinator)
         salesCoordinator.start()
+    }
+    
+    private func showMainApp() {
+        let mainVC = UIViewController()
+        mainVC.view.backgroundColor = .systemGreen
+        mainVC.title = "Main App Screen"
+        navigationController.setViewControllers([mainVC], animated: true)
     }
     
     private func remove(coordinator: Coordinator) {
@@ -56,4 +64,18 @@ extension AppCoordinator: OnboardingCoordinatorDelegate {
         remove(coordinator: coordinator)
         showSalesScreen()
     }
+}
+
+extension AppCoordinator: SalesCoordinatorDelegate {
+    func didTappedClose() {
+        showMainApp()
+    }
+    
+    func didFinishSales(coordinator: SalesCoordinator) {
+        LogService.log("AppCoordinator: Флоу продаж завершен. Показываю главный экран.")
+        remove(coordinator: coordinator)
+        showMainApp()
+    }
+    
+    
 }

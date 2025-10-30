@@ -1,41 +1,22 @@
-//
-//  ViewController.swift
-//  TestTaskGuruApps
-//
-//  Created by Пащенко Иван on 30.10.2025.
-//
-
 import UIKit
 import RxSwift
 import RxCocoa
 import SnapKit
 
 class OnboardingViewController: UIViewController {
-
+    
     private let viewModel: OnboardingViewModel
     private let disposeBag = DisposeBag()
     
-    // MARK: - UI Elements
+    private var pageViewControllers: [UIViewController] = []
     
     private let pageViewController = UIPageViewController(
         transitionStyle: .scroll,
         navigationOrientation: .horizontal,
         options: nil
     )
-    
-    private let continueButton: UIButton = {
-        let button = UIButton(type: .system)
-        button.setTitle("Continue", for: .normal)
-        button.titleLabel?.font = .systemFont(ofSize: 18, weight: .bold)
-        button.backgroundColor = .systemBlue
-        button.setTitleColor(.white, for: .normal)
-        button.layer.cornerRadius = 10
-        button.isEnabled = false
-        button.alpha = 0.5
-        return button
-    }()
-    
-    private var pageViewControllers: [UIViewController] = []
+    private let titleLabel = UILabel()
+    private let continueButton = UIButton(type: .system)
     
     // MARK: - Initializer
     
@@ -56,26 +37,75 @@ class OnboardingViewController: UIViewController {
         bindViewModel()
     }
     
-    // MARK: - UI Setup
+    // MARK: - Setup
     
     private func setupUI() {
-        view.backgroundColor = .white
+        view.backgroundColor = UIColor(named: "customBg")
         
+        setupTitleLabel()
+        setupPageViewController()
+        setupContinueButton()
+    }
+    
+    private func setupTitleLabel() {
+        view.addSubview(titleLabel)
+        
+        titleLabel.text = "Let’s setup App for you"
+        titleLabel.textColor = .black
+        titleLabel.numberOfLines = 1
+        titleLabel.font = .systemFont(ofSize: 26, weight: .bold)
+        
+        titleLabel.snp.makeConstraints { make in
+            make.left.right.equalToSuperview().inset(AdaptiveService.getAdaptiveWidth(24))
+            make.top.equalToSuperview().inset(AdaptiveService.getAdaptiveHeight(104))
+        }
+    }
+    
+    private func setupPageViewController() {
         addChild(pageViewController)
         view.addSubview(pageViewController.view)
         pageViewController.didMove(toParent: self)
         
+        pageViewController.view.snp.makeConstraints { make in
+            make.top.equalTo(titleLabel.snp.bottom).offset(AdaptiveService.getAdaptiveHeight(32))
+            make.leading.trailing.equalToSuperview().inset(AdaptiveService.getAdaptiveWidth(24))
+        }
+    }
+    
+    private func setupContinueButton() {
         view.addSubview(continueButton)
         
-        pageViewController.view.snp.makeConstraints { make in
-            make.top.leading.trailing.equalTo(view.safeAreaLayoutGuide)
-        }
+        continueButton.layer.cornerRadius = 28
+        continueButton.titleLabel?.font = .systemFont(ofSize: 17, weight: .bold)
+        continueButton.setTitle("Continue", for: .normal)
         
         continueButton.snp.makeConstraints { make in
-            make.top.equalTo(pageViewController.view.snp.bottom).offset(20)
-            make.leading.trailing.equalToSuperview().inset(20)
-            make.bottom.equalTo(view.safeAreaLayoutGuide).inset(20)
-            make.height.equalTo(50)
+            make.top.equalTo(pageViewController.view.snp.bottom).offset(AdaptiveService.getAdaptiveHeight(92))
+            make.left.right.equalToSuperview().inset(AdaptiveService.getAdaptiveWidth(24))
+            make.bottom.equalTo(view.safeAreaLayoutGuide).inset(AdaptiveService.getAdaptiveHeight(48))
+            make.height.equalTo(AdaptiveService.getAdaptiveHeight(56))
+        }
+    }
+    
+    private func updateContinueButton(isEnabled: Bool) {
+        continueButton.isEnabled = isEnabled
+        
+        if isEnabled {
+            continueButton.backgroundColor = .black
+            continueButton.setTitleColor(.white, for: .normal)
+            
+            continueButton.layer.shadowOpacity = 0
+            
+        } else {
+            continueButton.backgroundColor = .white
+            continueButton.setTitleColor(UIColor(named: "disableGrayText"), for: .disabled)
+            
+            continueButton.layer.shadowColor = UIColor(named: "continueBtnShadow")?.cgColor
+            continueButton.layer.shadowOffset = CGSize(width: 0, height: -4)
+            continueButton.layer.shadowRadius = 18.0
+            continueButton.layer.shadowOpacity = 0.25
+            
+            continueButton.layer.masksToBounds = false
         }
     }
     
@@ -87,7 +117,7 @@ class OnboardingViewController: UIViewController {
                 self?.setupPages(with: pages)
             })
             .disposed(by: disposeBag)
-            
+        
         viewModel.navigateToPage
             .drive(onNext: { [weak self] index in
                 self?.navigateToPage(at: index)
@@ -96,11 +126,10 @@ class OnboardingViewController: UIViewController {
         
         viewModel.isContinueButtonEnabled
             .drive(onNext: { [weak self] isEnabled in
-                self?.continueButton.isEnabled = isEnabled
-                self?.continueButton.alpha = isEnabled ? 1.0 : 0.5
+                self?.updateContinueButton(isEnabled: isEnabled)
             })
             .disposed(by: disposeBag)
-        
+         
         continueButton.rx.tap
             .bind(onNext: viewModel.continueButtonTapped)
             .disposed(by: disposeBag)
@@ -121,7 +150,7 @@ class OnboardingViewController: UIViewController {
     private func navigateToPage(at index: Int) {
         guard index < pageViewControllers.count else { return }
         let targetPage = pageViewControllers[index]
-        pageViewController.setViewControllers([targetPage], direction: .forward, animated: true)
+        pageViewController.setViewControllers([targetPage], direction: .forward, animated: true, completion: nil)
     }
 }
 
@@ -131,4 +160,3 @@ extension OnboardingViewController: OnboardingPageDelegate {
         viewModel.didSelectAnswer(answer)
     }
 }
-

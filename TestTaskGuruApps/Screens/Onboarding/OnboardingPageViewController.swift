@@ -1,10 +1,3 @@
-//
-//  OnboardingPageViewController.swift
-//  TestTaskGuruApps
-//
-//  Created by Пащенко Иван on 30.10.2025.
-//
-
 import UIKit
 import SnapKit
 
@@ -19,13 +12,20 @@ class OnboardingPageViewController: UIViewController {
     
     private let questionLabel: UILabel = {
         let label = UILabel()
-        label.font = .systemFont(ofSize: 24, weight: .bold)
-        label.textAlignment = .center
+        label.font = .systemFont(ofSize: 20, weight: .semibold)
+        label.textColor = .black
+        label.textAlignment = .left
         label.numberOfLines = 0
         return label
     }()
     
-    private let answersTableView = UITableView()
+    private let answersTableView: UITableView = {
+        let tableView = UITableView()
+        tableView.separatorStyle = .none
+        tableView.backgroundColor = .clear
+        tableView.showsVerticalScrollIndicator = false
+        return tableView
+    }()
     
     // MARK: - Initializer
     
@@ -45,26 +45,28 @@ class OnboardingPageViewController: UIViewController {
         super.viewDidLoad()
         setupUI()
         configureContent()
-    }
-    
-    // MARK: - UI Setup
-    
-    private func setupUI() {
-        view.backgroundColor = .white
-        view.addSubview(questionLabel)
-        view.addSubview(answersTableView)
         
         answersTableView.dataSource = self
         answersTableView.delegate = self
-        answersTableView.register(UITableViewCell.self, forCellReuseIdentifier: "AnswerCell")
+    }
+    
+    // MARK: - Setup
+    
+    private func setupUI() {
+        view.backgroundColor = .clear
+        
+        view.addSubview(questionLabel)
+        view.addSubview(answersTableView)
+        
+        answersTableView.register(OnboardPageTableViewCell.self, forCellReuseIdentifier: OnboardPageTableViewCell.reuseIdentifier)
         
         questionLabel.snp.makeConstraints { make in
-            make.top.equalToSuperview().offset(50)
-            make.leading.trailing.equalToSuperview().inset(20)
+            make.top.equalToSuperview()
+            make.leading.trailing.equalToSuperview()
         }
         
         answersTableView.snp.makeConstraints { make in
-            make.top.equalTo(questionLabel.snp.bottom).offset(30)
+            make.top.equalTo(questionLabel.snp.bottom).offset(AdaptiveService.getAdaptiveHeight(20))
             make.leading.trailing.bottom.equalToSuperview()
         }
     }
@@ -76,13 +78,18 @@ class OnboardingPageViewController: UIViewController {
 
 // MARK: - UITableViewDataSource & Delegate
 extension OnboardingPageViewController: UITableViewDataSource, UITableViewDelegate {
+    
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         return pageData.answers.count
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        let cell = tableView.dequeueReusableCell(withIdentifier: "AnswerCell", for: indexPath)
-        cell.textLabel?.text = pageData.answers[indexPath.row]
+        guard let cell = tableView.dequeueReusableCell(withIdentifier: OnboardPageTableViewCell.reuseIdentifier, for: indexPath) as? OnboardPageTableViewCell else {
+            return UITableViewCell()
+        }
+        
+        cell.setupCell(with: pageData.answers[indexPath.row])
+        
         return cell
     }
     
