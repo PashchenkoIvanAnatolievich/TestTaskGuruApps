@@ -1,5 +1,5 @@
-# Created by https://www.toptal.com/developers/gitignore/api/swift,cocoapods,objective-c
-# Edit at https://www.toptal.com/developers/gitignore?templates=swift,cocoapods,objective-c
+# Created by https://www.toptal.com/developers/gitignore/api/swift,cocoapods,objective-c,swiftpackagemanager
+# Edit at https://www.toptal.com/developers/gitignore?templates=swift,cocoapods,objective-c,swiftpackagemanager
 
 ### CocoaPods ###
 ## CocoaPods GitIgnore Template
@@ -129,4 +129,10 @@ Dependencies/
 # https://github.com/johnno1962/injectionforxcode
 
 
-# End of https://www.toptal.com/developers/gitignore/api/swift,cocoapods,objective-c
+### SwiftPackageManager ###
+Packages
+xcuserdata
+*.xcodeproj
+
+
+# End of https://www.toptal.com/developers/gitignore/api/swift,cocoapods,objective-c,swiftpackagemanager
