@@ -22,7 +22,7 @@ class OnboardingCoordinator: Coordinator {
         viewModel.onboardingDidFinish = { [weak self] in
             guard let self = self else { return }
             
-            print("OnboardingCoordinator: Получил сигнал от ViewModel. Сообщаю AppCoordinator.")
+            LogService.log("OnboardingCoordinator: Получил сигнал от ViewModel. Сообщаю AppCoordinator.")
             self.delegate?.didFinishOnboarding(coordinator: self)
         }
         

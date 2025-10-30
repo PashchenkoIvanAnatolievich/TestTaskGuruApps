@@ -11,7 +11,7 @@ class NetworkService {
     
     func fetchOnboardingData(completion: @escaping (Result<OnboardingResponse, Error>) -> Void) {
         guard let url = URL(string: "https://test-ios.universeapps.limited/onboarding") else {
-            print("Invalid URL")
+            LogService.log("Invalid URL", type: .error)
             return
         }
         
@@ -23,7 +23,7 @@ class NetworkService {
                 }
                 
                 guard let data = data else {
-                    print("No data received")
+                    LogService.log("No data received", type: .error)
                     return
                 }
                 

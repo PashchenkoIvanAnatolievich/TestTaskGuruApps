@@ -16,7 +16,7 @@ class SalesCoordinator: Coordinator {
     
     func start() {
         let salesViewController = SalesViewController()
-        print("SalesCoordinator: Показываю SalesViewController.")
+        LogService.log("SalesCoordinator: Показываю SalesViewController.")
         navigationController.setViewControllers([salesViewController], animated: true)
     }
 }

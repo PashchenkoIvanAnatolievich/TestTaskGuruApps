@@ -63,7 +63,7 @@ class OnboardingViewModel {
             
         } else {
             
-            print("ViewModel: Онбординг завершен. Отправляю сигнал координатору.")
+            LogService.log("ViewModel: Онбординг завершен. Отправляю сигнал координатору.")
             onboardingDidFinish?()
         }
     }
@@ -76,7 +76,7 @@ class OnboardingViewModel {
             case .success(let response):
                 self?.pagesRelay.accept(response.items)
             case .failure(let error):
-                print("Failed to fetch onboarding data: \(error)")
+                LogService.log("Failed to fetch onboarding data: \(error)", type: .error)
                 self?.pagesRelay.accept([])
             }
         }
