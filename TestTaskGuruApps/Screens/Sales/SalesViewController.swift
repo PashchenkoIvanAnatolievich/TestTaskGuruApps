@@ -7,7 +7,7 @@
 
 import UIKit
 
-class SaleViewController: UIViewController {
+class SalesViewController: UIViewController {
 
     override func viewDidLoad() {
         super.viewDidLoad()

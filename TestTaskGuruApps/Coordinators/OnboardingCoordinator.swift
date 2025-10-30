@@ -7,28 +7,28 @@
 
 import UIKit
 
-class OnboardCoordinator: Coordinator {
+class OnboardingCoordinator: Coordinator {
     var navigationController: UINavigationController
-
+    weak var delegate: OnboardingCoordinatorDelegate?
+    
     init(navigationController: UINavigationController) {
         self.navigationController = navigationController
     }
-
+    
     func start() {
-        let viewModel = OnboardingViewModel()
+        let networkService = NetworkService()
+        let viewModel = OnboardingViewModel(networkService: networkService)
         
-        viewModel.didFinishOnboarding = { [weak self] in
-            self?.showSalesScreen()
+        viewModel.onboardingDidFinish = { [weak self] in
+            guard let self = self else { return }
+            
+            print("OnboardingCoordinator: Получил сигнал от ViewModel. Сообщаю AppCoordinator.")
+            self.delegate?.didFinishOnboarding(coordinator: self)
         }
         
-        let viewController = OnboardViewController(viewModel: viewModel)
-        navigationController.pushViewController(viewController, animated: true)
+        let viewController = OnboardingViewController(viewModel: viewModel)
+        navigationController.isNavigationBarHidden = true
+        navigationController.setViewControllers([viewController], animated: true)
     }
-}
-
-extension OnboardCoordinator {
-    private func showSalesScreen() {
-        // Здесь будет запущен следующий флоу - экран продаж
-        print("Координатор: Онбординг завершен, показываю экран продаж.")
-    }
+    
 }

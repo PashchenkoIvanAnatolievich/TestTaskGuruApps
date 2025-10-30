@@ -6,14 +6,79 @@
 //
 
 import Foundation
+import RxSwift
+import RxCocoa
 
 class OnboardingViewModel {
-    var didFinishOnboarding: (() -> Void)?
     
-    func finishButtonTapped() {
-        // Какая-то логика
-        print("ViewModel: Кнопка 'Готово' нажата, сообщаю координатору.")
-        // Вызываем замыкание, чтобы передать управление координатору
-        didFinishOnboarding?()
+    // MARK: - Output
+    let onboardingPages: Driver<[OnboardingScreen]>
+    let navigateToPage: Driver<Int>
+    let isContinueButtonEnabled: Driver<Bool>
+    var onboardingDidFinish: (() -> Void)?
+    
+    // MARK: - Private Properties
+    
+    private let disposeBag = DisposeBag()
+    
+    private let pagesRelay = BehaviorRelay<[OnboardingScreen]>(value: [])
+    private let currentPageIndexRelay = BehaviorRelay<Int>(value: 0)
+    private let selectedAnswerRelay = BehaviorRelay<String?>(value: nil)
+    
+    private let networkService: NetworkService
+    
+    // MARK: - Initializer
+    
+    init(networkService: NetworkService) {
+        self.networkService = networkService
+        
+        self.onboardingPages = pagesRelay.asDriver()
+        self.navigateToPage = currentPageIndexRelay.asDriver()
+        
+        self.isContinueButtonEnabled = selectedAnswerRelay
+            .map { $0 != nil }
+            .asDriver(onErrorJustReturn: false)
+        
+        fetchOnboardingPages()
+    }
+    
+    // MARK: - Input
+    
+    func didSelectAnswer(_ answer: String) {
+        selectedAnswerRelay.accept(answer)
+    }
+    
+    func continueButtonTapped() {
+        let currentIndex = currentPageIndexRelay.value
+        let totalPages = pagesRelay.value.count
+        
+        guard totalPages > 0 else { return }
+        
+        if currentIndex < totalPages - 1 {
+            
+            let nextIndex = currentIndex + 1
+            currentPageIndexRelay.accept(nextIndex)
+            
+            selectedAnswerRelay.accept(nil)
+            
+        } else {
+            
+            print("ViewModel: Онбординг завершен. Отправляю сигнал координатору.")
+            onboardingDidFinish?()
+        }
+    }
+    
+    // MARK: - Private Methods
+    
+    private func fetchOnboardingPages() {
+        networkService.fetchOnboardingData { [weak self] result in
+            switch result {
+            case .success(let response):
+                self?.pagesRelay.accept(response.items)
+            case .failure(let error):
+                print("Failed to fetch onboarding data: \(error)")
+                self?.pagesRelay.accept([])
+            }
+        }
     }
 }
